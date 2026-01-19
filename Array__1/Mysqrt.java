@@ -1,4 +1,4 @@
-package Array;
+package Array__1;
 
 public class Mysqrt {
     public int mySqrt(int x) {
@@ -21,6 +21,7 @@ public class Mysqrt {
 
     public static void main(String[] args) {
         Mysqrt test = new Mysqrt();
+
         System.out.println("算术平方根测试： "+test.mySqrt(8));
         System.out.println("算术平方根测试： "+test.mySqrt(9));
         System.out.println("算术平方根测试： "+test.mySqrt(10));

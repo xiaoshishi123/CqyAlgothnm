@@ -6,9 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="com.shanyangcode.AlgoDemo" />
+        <module name="ListNode" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="11" />
+    <bytecodeTargetLevel target="11">
+      <module name="com.shanyangcode.AlgoDemo" target="17" />
+    </bytecodeTargetLevel>
   </component>
 </project>

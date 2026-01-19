@@ -1,4 +1,4 @@
-package Array;
+package Array__1;
 
 public class BinarySearchTest {
 
