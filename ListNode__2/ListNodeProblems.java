@@ -16,12 +16,13 @@ public class ListNodeProblems {
         if (arr == null || arr.length == 0) return null;
         ListNode head = new ListNode(arr[0]);
         ListNode cur = head;
-        for (int i = 1; i < arr.length; i++){
+        for (int i = 0; i < arr.length; i++){
             ListNode next = new ListNode(arr[i]);
-            head.next = next;
-            head = next;
+            cur.next = next;
+            cur = next;
         }
-        return cur;
+        return head;
+
     }
 
     //打印链表
@@ -50,6 +51,15 @@ public class ListNodeProblems {
             pre = cur;
             cur = next;
         }
+
+       /* ListNode pre = null;
+        ListNode cur = head;
+        while(cur!=null){
+            ListNode next = cur.next;
+            cur.next = pre;
+            pre = cur;
+            cur = next;
+        }*/
 
         return pre;
     }
