@@ -260,3 +260,244 @@ peek() → q.peek()
 
 核心：让最新元素永远在队头
 ```
+
+
+
+#### 3， 括号匹配
+
+这个不知道怎么记   自己看吧 本质上就是对hashmap的应用
+
+
+
+**核心：存入左括号  然后如果是右括号就去匹配**
+
+`map.containsKey(c)`  因为左括号是key 右括号是值
+
+优先级括号匹配也差不多  看看就懂了
+
+```java
+package Stack_Queue_3;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
+
+public class kuohaopipei {
+    /*
+      给定只包括括号的字符串s， 判断字符串是否有效
+      括号必须以正确的顺序关闭，"()"和"()[]{}"都是有效的但是"(]"和"([)]"不是
+      输入：s = "()"
+      输出：true
+      输入：s = "()[]{}"
+      输出：true
+      输入：s = "(]"
+      输出：false
+    */
+    public boolean isValid_normal(String s) {
+        if (s.length() % 2 != 0) return false;
+        Map <Character, Character> map = new HashMap<>();
+        map.put('(', ')');
+        map.put('[', ']');
+        map.put('{', '}');
+
+        Stack<Character> stack = new Stack<>();
+
+        for (int i = 0; i < s.length(); i++){
+            char c = s.charAt(i);
+            if(map.containsKey(c)){
+                stack.push(c);
+            }
+            else {
+                if (stack.isEmpty()){
+                    return false;
+                }
+                if (map.get(stack.peek()) == c){
+                    stack.pop();
+                }
+                else {
+                    return false;
+                }
+
+            }
+        }
+        return stack.isEmpty();
+    }
+
+    public boolean isValid_withPriority(String s, String priorityOrder) {
+       if (s.length() % 2 != 0){
+           return false;
+       }
+       Map<Character, Character> map = new HashMap<>();
+       map.put('(', ')');
+       map.put('[', ']');
+       map.put('{', '}');
+
+       Map<Character, Integer> priorityMap = new HashMap<>();
+       for (int i = 0; i < priorityOrder.length(); i++){
+           priorityMap.put(priorityOrder.charAt(i),priorityOrder.length()-i);//优先级 递减
+       }
+
+       Stack<Character> stack = new Stack<>();
+
+       for (int i = 0; i < s.length(); i++){
+           char c = s.charAt(i);
+           if (map.containsKey(c)){
+               //先检查优先级 如果不满足返回false
+               if (!stack.isEmpty()){
+                   char top = stack.peek();
+                   if (priorityMap.get(top) > priorityMap.get(c)){
+                       return false;
+                   }
+
+               }
+               //这个很关键 不管是不是空肯定都要入栈的 你想想就会明白
+               stack.push(c);
+           }else{//右边括号
+               if (stack.isEmpty()){
+                   return false;
+               }
+
+               char top = stack.peek();
+               if (c!= map.get(top)){
+                   return false;
+               } else{
+                   stack.pop();
+               }
+           }
+       }
+
+        return stack.isEmpty();
+    }
+
+    public static void main(String[] args) {
+        kuohaopipei checker = new kuohaopipei();
+    }
+}
+
+```
+
+
+
+#### 4，单调栈
+
+很重要，核心就是维护一个单调递增或者递减的栈 
+
+1，栈里面存的是索引，通过索引去数组里面找值
+
+2，判断条件是固定的：栈不是空的（前面有可以对比的值） &&  当前要入栈的更大（这个大小看题目，比如接雨水肯定是大）
+
+```java
+while (!stack.isEmpty() && nums[stack.peekLast()] < nums[i])
+```
+
+
+
+结合例子理解吧：
+
+##### 问题1：寻找下一个更大元素
+
+* 给定一个非负整数数组，对于每个元素找出它右边第一个比它大的元素，若没有返回-1
+
+```java
+public int[] nextGreater(int[] nums) {
+        if (nums == null || nums.length <= 0) {
+            return new int[0];
+        }
+        Deque<Integer> stack = new LinkedList<>();
+        int n = nums.length;
+        int[] result = new int[n];
+
+        for (int i = 0; i < n; i++) {
+            result[i] = -1; // 默认值为-1（表示右边没有更大的元素）
+
+            // 关键循环：当前元素比栈顶元素大时
+            // 说明当前元素是栈顶元素的"下一个更大元素"
+            while (!stack.isEmpty() && nums[stack.peekLast()] < nums[i]) {
+                int index = stack.pollLast(); // 弹出栈顶索引
+                result[index] = nums[i];     // 设置结果：栈顶元素找到了更大的数
+            }
+            stack.offerLast(i); // 当前索引入栈，等待被后面的元素匹配
+        }
+        return result;
+    }
+```
+
+##### 2，接雨水
+
+这个比起上面的单纯单调栈，更加复杂一些 ，但是判断条件没有变
+
+只是，需要用到三个栈内的索引：
+
+1，当前要入栈的位置（右墙）
+
+2，stack.pop  或者说stack.pollLast()   （底部）
+
+3，stack.peekLast()  （左墙）
+
+```java
+   /**
+     * 问题2：接雨水问题
+     * 给定 n 个非负整数表示每个宽度为 1 的柱子的高度图
+     * 计算按此排列的柱子，下雨之后能接多少雨水
+     *
+     * 思路（单调栈解法）：
+     * 1. 使用单调递减栈（栈中柱子高度递减，存的是索引）
+     * 2. 遍历每个柱子：
+     *    - 当当前柱子高度 > 栈顶柱子高度时（破坏递减性）：
+     *        说明可能形成了"左墙-凹槽-右墙"的结构
+     *
+     *        a. 弹出栈顶作为"凹槽底部" (bottom)
+     *        b. 如果栈为空，说明没有左墙，不能接水
+     *        c. 新的栈顶作为"左墙" (left)
+     *        d. 当前柱子作为"右墙" (right = i)
+     *
+     *        计算这一层水的面积：
+     *          宽度 = 右墙索引 - 左墙索引 - 1
+     *          水深 = min(左墙高度, 右墙高度) - 底部高度
+     *          面积 = 宽度 × 水深
+     *
+     *    - 当前柱子的索引入栈
+     *
+     * 核心理解：
+     *   栈中维护的是可能成为"左墙"的柱子
+     *   当遇到更高的柱子（右墙）时，计算它与栈顶（左墙）之间能接多少水
+     *   计算的是水平层的面积，从下往上一层一层计算
+     *
+     * 时间复杂度：O(n)
+     * 空间复杂度：O(n)
+     *
+     * 示例：
+     * 输入：[0,1,0,2,1,0,1,3,2,1,2,1]
+     * 输出：6
+     */
+    public int trap(int[] height) {
+        Deque<Integer> stack = new LinkedList<>();
+        int ans = 0;
+        int n = height.length;
+
+        for (int i = 0; i < n; i++) {
+            // 当当前柱子比栈顶柱子高时，可能形成凹槽
+            while (!stack.isEmpty() && height[i] > height[stack.peekLast()]) {
+                // 弹出凹槽底部
+                int bottom = stack.pollLast();
+
+                // 如果没有左墙，不能接水
+                if (stack.isEmpty()) {
+                    break;
+                }
+
+                // 左墙是新的栈顶
+                int left = stack.peekLast();
+
+                // 计算这一层水的面积
+                int width = i - left - 1;  // 凹槽宽度
+                int h = Math.min(height[left], height[i]) - height[bottom];  // 水深
+                ans = ans + width * h;  // 累加面积
+            }
+            // 当前柱子的索引入栈（可能成为未来的左墙）
+            stack.offerLast(i);
+        }
+        return ans;
+    }
+```
+
